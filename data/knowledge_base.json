@@ -1,0 +1,42 @@
+{
+  "documents": {},
+  "faqs": {
+    "location": {
+      "question": "Where is the summer school located?",
+      "answer": "The summer school location information will be updated once available.",
+      "keywords": [
+        "location",
+        "address",
+        "where",
+        "school",
+        "campus"
+      ]
+    },
+    "schedule": {
+      "question": "What is the program schedule?",
+      "answer": "The program schedule will be available once finalized.",
+      "keywords": [
+        "schedule",
+        "timeline",
+        "program",
+        "dates",
+        "time"
+      ]
+    },
+    "registration": {
+      "question": "How do I register for the summer school?",
+      "answer": "Registration details will be provided once the process is open.",
+      "keywords": [
+        "register",
+        "registration",
+        "apply",
+        "enrollment"
+      ]
+    }
+  },
+  "locations": {},
+  "schedules": {},
+  "policies": {},
+  "last_updated": "2025-07-23T08:29:49.835952",
+  "version": "1.0"
+}

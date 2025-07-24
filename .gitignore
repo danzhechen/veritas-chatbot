@@ -1,0 +1,192 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ========================================
+# 🔒 PRIVACY & SECURITY FILES
+# ========================================
+
+# Configuration files with secrets
+config.env
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# API Keys and Credentials
+*api_key*
+*secret*
+*token*
+*password*
+*credentials*.json
+*auth*.json
+*oauth*.json
+
+# Google Drive & OAuth
+config/google_drive_credentials.json
+config/token.json
+config/service_account.json
+token.json
+credentials.json
+service_account.json
+oauth2_token.json
+google_credentials.json
+
+# LLM API Keys
+openai_key.txt
+anthropic_key.txt
+google_ai_key.txt
+
+# SSH & Certificate files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+known_hosts
+
+# Database files that might contain personal data
+*.db
+*.sqlite
+*.sqlite3
+chat.db
+
+# ========================================
+# PROJECT SPECIFIC
+# ========================================
+
+# Downloaded documents (might contain sensitive info)
+data/downloaded_documents/
+data/temp/
+data/cache/
+data/backup/
+
+# Logs (might contain personal info)
+logs/
+*.log
+debug.log
+error.log
+access.log
+
+# User data
+user_data/
+personal_data/
+conversations/
+history/
+
+# Temporary files
+temp_*
+debug_*
+test_*
+scratch_*
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# ========================================
+# DEVELOPMENT & TESTING
+# ========================================
+
+# Local configuration overrides
+local_config.*
+dev_config.*
+test_config.*
+
+# Test data that might contain personal info
+test_data/
+mock_data/
+sample_conversations/
+
+# Jupyter notebooks with output (might contain API responses)
+*.ipynb_checkpoints/
+
+# ========================================
+# DEPLOYMENT
+# ========================================
+
+# Docker secrets
+.docker/
+docker-compose.override.yml
+.dockerignore.local
+
+# Kubernetes secrets
+*.yaml.local
+*-secret.yaml
+*-secrets.yaml
+
+# Server configuration
+nginx.conf.local
+apache.conf.local
+gunicorn.conf.local 

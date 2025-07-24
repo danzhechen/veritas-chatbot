@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>论坛聊天机器人集成示例</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .forum-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .forum-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .post {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        
+        .post:last-child {
+            border-bottom: none;
+        }
+        
+        .post-author {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .post-content {
+            margin-top: 5px;
+            line-height: 1.6;
+        }
+        
+        /* 聊天机器人样式 */
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            z-index: 1001;
+            transition: transform 0.3s ease;
+        }
+        
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .chatbot-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            opacity: 1;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            text-align: right;
+        }
+        
+        .user-message .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 18px 18px 5px 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message .message-bubble {
+            background: white;
+            border: 1px solid #e0e0e0;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 18px 18px 18px 5px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .chatbot-input {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            background: white;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .chatbot-input input:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s ease;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-indicator {
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 12px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .status-online {
+            color: #28a745;
+        }
+        
+        .status-offline {
+            color: #dc3545;
+        }
+        
+        .typing-indicator {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            font-size: 14px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 400px) {
+            .chatbot-widget {
+                width: calc(100vw - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+        
+        /* 测试模式样式 */
+        .test-mode {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-mode h3 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 论坛页面内容 -->
+    <div class="forum-header">
+        <h1>🎓 唯理书院论坛</h1>
+        <p>学术交流，思辨人生</p>
+    </div>
+
+    <!-- 测试模式面板 -->
+    <div class="test-mode">
+        <h3>🧪 聊天机器人测试模式</h3>
+        <p>点击下面的按钮测试不同的问题，或者直接点击右下角的机器人图标开始对话。</p>
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testQuestion('你好！')">问候测试</button>
+            <button class="test-btn" onclick="testQuestion('书院的地址在哪里？')">地址查询</button>
+            <button class="test-btn" onclick="testQuestion('我需要自己买床垫吗？')">床垫问题</button>
+            <button class="test-btn" onclick="testQuestion('晚间活动可以不参加吗？')">活动政策</button>
+            <button class="test-btn" onclick="testQuestion('如何邮寄物品到学校？')">邮寄咨询</button>
+            <button class="test-btn" onclick="testQuestion('谢谢你的帮助！')">告别测试</button>
+        </div>
+    </div>
+
+    <div class="forum-content">
+        <h2>📚 学术讨论</h2>
+        
+        <div class="post">
+            <div class="post-author">📝 张三同学</div>
+            <div class="post-content">
+                大家好，我想了解一下书院的具体地址和交通信息，有知道的同学可以分享一下吗？
+            </div>
+        </div>
+        
+        <div class="post">
+            <div class="post-author">📝 李四同学</div>
+            <div class="post-content">
+                关于住宿的问题，我想问一下床上用品需要自己准备吗？还是学校会提供？
+            </div>
+        </div>
+        
+        <div class="post">
+            <div class="post-author">📝 王五同学</div>
+            <div class="post-content">
+                想了解一下书院的日程安排，特别是晚间活动的情况。
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: #666;">
+            💡 <strong>提示</strong>：有问题可以咨询右下角的智能助手！
+        </div>
+    </div>
+
+    <!-- 聊天机器人切换按钮 -->
+    <button id="chatbot-toggle" class="chatbot-toggle" onclick="toggleChatbot()">
+        🤖
+    </button>
+
+    <!-- 聊天机器人组件 -->
+    <div id="chatbot-widget" class="chatbot-widget" style="display: none;">
+        <div class="chatbot-header">
+            <h3>🎓 唯理书院智能助手</h3>
+            <button class="close-btn" onclick="toggleChatbot()">×</button>
+        </div>
+        
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div id="status-indicator" class="status-indicator status-offline">
+                🔄 正在连接智能助手...
+            </div>
+            <div class="message bot-message">
+                <div class="message-bubble">
+                    <strong>🤖 助手:</strong> 你好！我是唯理书院智能助手。有什么可以帮助你的吗？
+                </div>
+            </div>
+        </div>
+        
+        <div class="chatbot-input">
+            <input type="text" id="message-input" placeholder="请输入你的问题..." 
+                   onkeypress="handleKeyPress(event)" maxlength="500">
+            <button id="send-btn" class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const CONFIG = {
+            apiBaseUrl: 'http://localhost:5000',  // 修改为你的API服务器地址
+            maxRetries: 3,
+            retryDelay: 1000,
+            enableTestMode: true
+        };
+        
+        let isOnline = false;
+        let retryCount = 0;
+        
+        // 页面加载时检查服务状态
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 论坛聊天机器人组件加载完成');
+            checkApiStatus();
+            // 每30秒检查一次状态
+            setInterval(checkApiStatus, 30000);
+        });
+        
+        // 检查API状态
+        function checkApiStatus() {
+            console.log('🔍 检查API状态...');
+            fetch(`${CONFIG.apiBaseUrl}/api/status`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ API状态检查成功:', data);
+                    updateStatus(data.status === 'online', '智能助手在线');
+                    retryCount = 0;
+                })
+                .catch(error => {
+                    console.error('❌ API状态检查失败:', error);
+                    updateStatus(false, '智能助手离线 - 请确保服务器正在运行');
+                    
+                    // 自动重试
+                    if (retryCount < CONFIG.maxRetries) {
+                        retryCount++;
+                        console.log(`🔄 ${CONFIG.retryDelay * retryCount}ms后重试...`);
+                        setTimeout(checkApiStatus, CONFIG.retryDelay * retryCount);
+                    }
+                });
+        }
+        
+        // 更新状态显示
+        function updateStatus(online, message) {
+            const statusIndicator = document.getElementById('status-indicator');
+            isOnline = online;
+            
+            if (online) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusIndicator.innerHTML = `✅ ${message}`;
+                console.log('✅ 聊天机器人在线');
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusIndicator.innerHTML = `❌ ${message}`;
+                console.log('❌ 聊天机器人离线');
+            }
+        }
+        
+        // 切换聊天机器人显示/隐藏
+        function toggleChatbot() {
+            const widget = document.getElementById('chatbot-widget');
+            const toggle = document.getElementById('chatbot-toggle');
+            
+            if (widget.style.display === 'none') {
+                widget.style.display = 'flex';
+                toggle.style.display = 'none';
+                console.log('📱 打开聊天机器人');
+                // 聚焦到输入框
+                setTimeout(() => {
+                    document.getElementById('message-input').focus();
+                }, 300);
+            } else {
+                widget.style.display = 'none';
+                toggle.style.display = 'block';
+                console.log('📱 关闭聊天机器人');
+            }
+        }
+        
+        // 处理回车键发送
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // 测试问题快捷按钮
+        function testQuestion(question) {
+            // 确保聊天窗口是打开的
+            const widget = document.getElementById('chatbot-widget');
+            if (widget.style.display === 'none') {
+                toggleChatbot();
+            }
+            
+            // 设置问题到输入框
+            const input = document.getElementById('message-input');
+            input.value = question;
+            
+            // 短暂延迟后发送
+            setTimeout(() => {
+                sendMessage();
+            }, 500);
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            if (!isOnline) {
+                showNotification('智能助手当前离线，请稍后再试', 'error');
+                console.log('❌ 尝试发送消息但助手离线');
+                return;
+            }
+            
+            const input = document.getElementById('message-input');
+            const sendBtn = document.getElementById('send-btn');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            console.log('📤 发送消息:', message);
+            
+            // 禁用输入和按钮
+            input.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.textContent = '发送中...';
+            
+            // 添加用户消息到界面
+            addMessage(message, 'user');
+            
+            // 清空输入框
+            input.value = '';
+            
+            // 显示正在输入指示器
+            showTypingIndicator();
+            
+            // 发送到API
+            fetch(`${CONFIG.apiBaseUrl}/api/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    use_llm: false  // 设置为true启用LLM响应
+                })
+            })
+            .then(response => {
+                console.log('📡 收到API响应，状态:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('📥 API响应数据:', data);
+                hideTypingIndicator();
+                
+                if (data.success) {
+                    addMessage(data.response, 'bot');
+                    console.log('✅ 消息发送成功');
+                } else {
+                    addMessage('抱歉，处理您的消息时出现错误。请稍后再试。', 'bot');
+                    console.error('❌ API错误:', data.error);
+                }
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                console.error('❌ 发送消息失败:', error);
+                addMessage('抱歉，网络连接出现问题。请检查网络后重试。', 'bot');
+                
+                // 重新检查API状态
+                checkApiStatus();
+            })
+            .finally(() => {
+                // 恢复输入和按钮
+                input.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送';
+                input.focus();
+            });
+        }
+        
+        // 添加消息到聊天界面
+        function addMessage(content, sender) {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            if (sender === 'user') {
+                bubbleDiv.innerHTML = `<strong>👤 你:</strong> ${escapeHtml(content)}`;
+            } else {
+                bubbleDiv.innerHTML = `<strong>🤖 助手:</strong> ${escapeHtml(content)}`;
+            }
+            
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            // 滚动到底部
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            console.log(`💬 添加${sender === 'user' ? '用户' : '机器人'}消息:`, content.substring(0, 50) + '...');
+        }
+        
+        // 显示正在输入指示器
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'typing-indicator';
+            typingDiv.textContent = '🤖 正在思考中...';
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            console.log('⏳ 显示输入指示器');
+        }
+        
+        // 隐藏正在输入指示器
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+                console.log('✅ 隐藏输入指示器');
+            }
+        }
+        
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            console.log(`🔔 显示通知 (${type}):`, message);
+            
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 6px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                animation: slideInNotification 0.3s ease;
+                ${type === 'error' ? 'background: #dc3545;' : 'background: #28a745;'}
+            `;
+            notification.textContent = message;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInNotification {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // 3秒后自动消失
+            setTimeout(() => {
+                notification.style.animation = 'slideInNotification 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // HTML转义防止XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(event) {
+            // Ctrl/Cmd + Shift + C 切换聊天机器人
+            if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'C') {
+                event.preventDefault();
+                toggleChatbot();
+                console.log('⌨️ 键盘快捷键触发');
+            }
+        });
+        
+        // 调试信息
+        console.log('🎯 配置信息:', CONFIG);
+        console.log('📖 使用说明:');
+        console.log('  - 点击右下角机器人图标打开聊天');
+        console.log('  - 使用测试按钮快速发送常见问题');
+        console.log('  - 按 Ctrl+Shift+C 快速切换聊天窗口');
+        console.log('  - 检查浏览器控制台查看详细日志');
+    </script>
+</body>
+</html> 
